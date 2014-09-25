@@ -30,55 +30,55 @@ int main()
   CvCapture* capture;
   capture = cvCreateCameraCapture( -1 );
 
-	if(!capture)
-	{
-		printf("\nCouldn't open the camera\n");
-		return -1;
-	}
+  if(!capture)
+  {
+    printf("\nCouldn't open the camera\n");
+    return -1;
+  }
 
-	// Camera captured image
+  // Camera captured image
   IplImage *image = cvQueryFrame( capture );
 
   // Reading .xml files for calibration
-	CvMat *intrinsic = (CvMat*)cvLoad("Intrinsics.xml");
-	CvMat *distortion = (CvMat*)cvLoad("Distortion.xml");
+  CvMat *intrinsic = (CvMat*)cvLoad("Intrinsics.xml");
+  CvMat *distortion = (CvMat*)cvLoad("Distortion.xml");
 
-	// Matrices for map calibration
-	IplImage* mapx = cvCreateImage( cvGetSize(image), IPL_DEPTH_32F, 1 );
-	IplImage* mapy = cvCreateImage( cvGetSize(image), IPL_DEPTH_32F, 1 );
-	cvInitUndistortMap(intrinsic,distortion,mapx,mapy);
+  // Matrices for map calibration
+  IplImage* mapx = cvCreateImage( cvGetSize(image), IPL_DEPTH_32F, 1 );
+  IplImage* mapy = cvCreateImage( cvGetSize(image), IPL_DEPTH_32F, 1 );
+  cvInitUndistortMap(intrinsic,distortion,mapx,mapy);
 
-	// Naming windows
-	cvNamedWindow( "Raw Video");
-	cvNamedWindow( "Undistorted Video" );
+  // Naming windows
+  cvNamedWindow( "Raw Video");
+  cvNamedWindow( "Undistorted Video" );
 
-	// The following loop is interrupted only when user presses Esc. After that, we move to contours find functions
-	while(image)
-	{
-		IplImage *t = cvCloneImage(image);
-		cvShowImage( "Raw Video", image );			// Show raw image
-		cvRemap( t, image, mapx, mapy );			// Undistort image
-		cvReleaseImage(&t);
-		cvShowImage("Undistorted Video", image);			// Show corrected image
+  // The following loop is interrupted only when user presses Esc. After that, we move to contours find functions
+  while(image)
+  {
+    IplImage *t = cvCloneImage(image);
+    cvShowImage( "Raw Video", image );      // Show raw image
+    cvRemap( t, image, mapx, mapy );      // Undistort image
+    cvReleaseImage(&t);
+    cvShowImage("Undistorted Video", image);      // Show corrected image
         
     int c = cvWaitKey(15);
 
-		if(c == 'p')
-		{
-			c = 0;
-			while(c != 'p' && c != 27)
-			{
-				c = cvWaitKey(250);
-			}
-		}
+    if(c == 'p')
+    {
+      c = 0;
+      while(c != 'p' && c != 27)
+      {
+        c = cvWaitKey(250);
+      }
+    }
 
-		if(c == 27)
-			break;
+    if(c == 27)
+      break;
 
-		image = cvQueryFrame( capture );
-	}
+    image = cvQueryFrame( capture );
+  }
 
-	// Intermediary Mat matrix
+  // Intermediary Mat matrix
   Mat img(image);
 
   // Show captured image

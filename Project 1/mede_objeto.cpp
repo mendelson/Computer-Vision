@@ -9,6 +9,9 @@
 using namespace std;
 using namespace cv;
 
+String calibFilesPath = "./calibration_files_mendelson/";
+//String calibFilesPath = "./calibration_files_quaresma/";
+
 // Gray-level image to be analysed
 Mat img_gray;
 
@@ -39,9 +42,12 @@ int main()
   // Camera captured image
   IplImage *image = cvQueryFrame( capture );
 
+  String intrinsicFile  = calibFilesPath + "Intrinsics.xml";
+  String distortionFile = calibFilesPath + "Distortion.xml";
+
   // Reading .xml files for calibration
-  CvMat *intrinsic = (CvMat*)cvLoad("Intrinsics.xml");
-  CvMat *distortion = (CvMat*)cvLoad("Distortion.xml");
+  CvMat *intrinsic  = (CvMat*)cvLoad(intrinsicFile.c_str());
+  CvMat *distortion = (CvMat*)cvLoad(distortionFile.c_str());
 
   // Matrices for map calibration
   IplImage* mapx = cvCreateImage( cvGetSize(image), IPL_DEPTH_32F, 1 );
@@ -102,8 +108,6 @@ int main()
 
   return 0;
 }
-
-
 
 void thresh_callback(int, void* )
 {

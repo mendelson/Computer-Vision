@@ -9,14 +9,14 @@
 using namespace std;
 using namespace cv;
 
-String calibFilesPath = "./calibration_files_mendelson/";
-//String calibFilesPath = "./calibration_files_quaresma/";
+//String calibFilesPath = "./calibration_files_mendelson/";
+String calibFilesPath = "./calibration_files_quaresma/";
 
 // Gray-level image to be analysed
 Mat img_gray;
 
 // Threshold to find contours. Smaller values make us find more contours, but noisier
-int thresh = 20;
+int thresh = 80;
 
 // Limiar máximo usado para criar uma barra, não estou utilizando mais
 int max_thresh = 255;
@@ -132,4 +132,61 @@ void thresh_callback(int, void* )
   // Show in a window
   namedWindow( "Contours", WINDOW_AUTOSIZE );
   imshow( "Contours", drawing );
+
+
+  Mat drawing_gray;
+  cvtColor(drawing, drawing_gray, CV_BGR2GRAY);
+  namedWindow( "Contours Gray", WINDOW_AUTOSIZE );
+  imshow( "Contours Gray", drawing_gray );
+  /* tentativa de fazer abertura e fechamento para tirar pequenos ruidos vindos de outros objetos, funcionou bem em alguns casos mas em outros nao, considere usar se quiser =D
+  //fechamento
+  int morph_size = 1;
+  Mat element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+  morphologyEx( drawing_gray, drawing_gray, 3, element );
+  //abertura
+  morph_size = 3;
+  element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+  morphologyEx( drawing_gray, drawing_gray, 2, element );
+
+
+  namedWindow( "Contours Gray Morphed", WINDOW_AUTOSIZE );
+  imshow( "Contours Gray Morphed", drawing_gray );
+
+  */
+  Scalar intensity;
+  int x,y;
+  int aux;
+  int xmaior = 0,xmenor = drawing_gray.cols;
+  int ymaior = 0,ymenor = drawing_gray.rows;
+
+
+
+  //Get the min and max values of x and y
+  for(y=0;y<drawing_gray.rows;y++){
+    for(x=0;x<drawing_gray.cols;x++){
+        intensity = drawing_gray.at<int>(Point(x, y));
+        int aux = intensity.val[0];
+        if(aux!=0){
+          if(x>xmaior){
+            xmaior = x;
+          }
+          if(x<xmenor){
+            xmenor = x;
+          }
+          if(y>ymaior){
+            ymaior = y;
+          }
+          if(y<xmenor){
+            ymenor = y;
+          }
+
+
+        }
+    }
+  }
+
+
+  printf("Largura do objeto em pixels: %d \n",(xmaior - xmenor));
+  printf("Altura do objeto em pixels: %d \n",(ymaior - ymenor));
+
 }

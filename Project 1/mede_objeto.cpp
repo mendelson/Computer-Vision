@@ -25,6 +25,10 @@ float k1,k2,p1,p2;
 
 //constantes intrinsecas
 float fx,fy,cx,cy;
+
+//distance of the object
+float dist;
+
 // Function that gets position of a click
 void click_callback(int event, int x, int y, int flags, void* userdata);
 
@@ -100,8 +104,8 @@ public:
 
   void calcXpYpM(){
     calcXpYp();
-    xp_m = xp/(fx*10000);
-    yp_m = yp/(fy*10000);
+    xp_m = xp*fx*dist/1000000000;
+    yp_m = yp*fy*dist/1000000000;
   }
 
 };
@@ -129,7 +133,8 @@ public:
   objectMeasure()
   {
     cout << "Program has started!"<< endl;
-
+    printf("Digite a distancia do objeto a ser medido:\n");
+    scanf("%f",&dist);
     // Initializing width and height
     initialW = new Pair();
     finalW = new Pair();
@@ -151,6 +156,8 @@ public:
 
     // Camera captured image
     image = cvQueryFrame( capture );
+
+
 
     String intrinsicFile  = calibFilesPath + "Intrinsics.xml";
     String distortionFile = calibFilesPath + "Distortion.xml";
@@ -272,7 +279,7 @@ int main()
 
 void thresh_callback(int i, void* input)
 {
-  cout << "\ni = " << i << endl;
+  //cout << "\ni = " << i << endl;
   if (input == NULL)
   {
     cout << "\nNull\n";
@@ -357,8 +364,8 @@ void thresh_callback(int i, void* input)
   }
 
 
-  printf("Largura do objeto em pixels: %d \n",(xmaior - xmenor));
-  printf("Altura do objeto em pixels: %d \n",(ymaior - ymenor));
+  //printf("Largura do objeto em pixels: %d \n",(xmaior - xmenor));
+  //printf("Altura do objeto em pixels: %d \n",(ymaior - ymenor));
 }
 
 void click_callback(int event, int x, int y, int flags, void* userdata)
@@ -423,7 +430,7 @@ void click_callback(int event, int x, int y, int flags, void* userdata)
       temp_dH = object->finalH->getYpM() - object->initialH->getYpM();
       temp_dH *= temp_dH;
       object->dH = sqrt(temp_dH);
-      cout << "\nWidth selected (meters): " << object->dH << endl;
+      cout << "\nHeight selected (meters): " << object->dH << endl;
 
       //destroyWindow( "Image" );
     }

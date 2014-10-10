@@ -24,14 +24,14 @@ public:
 	}
 	void setOptionFromMenu(){
 		printf("*******************************\n");
-		printf("De onde deseja obter a imagem?\n");
-		printf("1 - arquivo de imagem\n");
-		printf("2 - arquivo de video \n");
-		printf("3 - câmera \n");
+		printf("What source of data do you want to use?\n");
+		printf("1 - Image file\n");
+		printf("2 - Video file\n");
+		printf("3 - Camera \n");
 		printf("*******************************\n");
 		scanf("%d",&option);
 		if(option != 1 && option!=2 && option!=3){
-			printf("Invalido!!!\n");
+			printf("Invalid option!!! Now, you'll be punished: rerun this program...\n");
 			exit(1);
 		}
 	}
@@ -46,19 +46,19 @@ public:
 	}
 
 	void getImageFromImageFile(){
-		printf("Digite o nome do arquivo(com extensão): \n");
+		printf("Enter file's name (with extension): \n");
 		scanf("%s",nome_arquivo);
 		image = cvLoadImage(nome_arquivo, CV_LOAD_IMAGE_COLOR);
 		if(!image){
-			printf("Nao foi possivel abrir a imagem! \n");
+			printf("Couldn't open input image! \n");
 			exit(1);
 		}
 	}
 
 	void getImageFromVideo(){
-		printf("Digite o nome do arquivo(com extensão): \n");
+		printf("Enter file's name (with extension): \n");
 		scanf("%s",nome_arquivo);
-		printf("Aperte Esc quando chegar no frame desejado \n");
+		printf("Press Esc to capture a frame\n");
 		cvNamedWindow( "Video", CV_WINDOW_AUTOSIZE );
 		capture = cvCreateFileCapture( nome_arquivo);
 		while(1) {
@@ -93,34 +93,31 @@ public:
 	}
 };
 
-
 //class that uses the Hough transform to detect lines and circles
 class HoughDetector{
 private:
-	Mat *src,dst,cdst,src_gray;
+	Mat *src,src1,src2,dst,cdst,src_gray;
 	ImageGetter *imagegetter;
 	vector<Vec4i> lines;
 	vector<Vec3f> circles;
-public:
-
-	HoughDetector(){
-		prepare();
-		hough();
-	}
 
 	void prepare(){
 		imagegetter = new ImageGetter();
 		src = new Mat(imagegetter->image);
+
+		src1 = *src;
+		src2 = *src;
+		//src1 = new Mat(imagegetter->image);
+		//src2 = new Mat(imagegetter->image);
 	}
 
 	void prepareHoughLines(){
-		Canny(*src, dst, 50, 200, 3);
+		Canny(src1, dst, 50, 200, 3);
  		cvtColor(dst, cdst, CV_GRAY2BGR);
-
 	}
 
 	void prepareHoughCircles(){
-		cvtColor( *src, src_gray, CV_BGR2GRAY );
+		cvtColor( src2, src_gray, CV_BGR2GRAY );
 		GaussianBlur( src_gray, src_gray, Size(9, 9), 2, 2 );
 	}
 
@@ -140,13 +137,13 @@ public:
 		}
 	}
 
-	void drawCicles(){
+	void drawCircles(){
 		for( size_t i = 0; i < circles.size(); i++ )
 		{
 		   Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 		   int radius = cvRound(circles[i][2]);
-		   circle( *src, center, 3, Scalar(0,255,0), -1, 8, 0 );
-		   circle( *src, center, radius, Scalar(0,0,255), 3, 8, 0 );
+		   circle( src2, center, 3, Scalar(0,255,0), -1, 8, 0 );
+		   circle( src2, center, radius, Scalar(0,0,255), 3, 8, 0 );
 		 }
 	}
 
@@ -159,7 +156,7 @@ public:
 
 	void showHoughCircles(){
 		namedWindow( "Detected circles", CV_WINDOW_AUTOSIZE );
-		imshow( "Detected circles", *src );
+		imshow( "Detected circles", src2 );
 	}
 
 	void houghLines(){
@@ -172,7 +169,7 @@ public:
 	void houghCircles(){
 		prepareHoughCircles();
 		makeHoughCircles();
-		drawCicles();
+		drawCircles();
 		showHoughCircles();
 	}
 
@@ -181,6 +178,12 @@ public:
 		houghCircles();
 	}
 
+public:
+
+	HoughDetector(){
+		prepare();
+		hough();
+	}
 };
 
 int main(int argc, char** argv)

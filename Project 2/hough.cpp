@@ -61,13 +61,15 @@ public:
 		printf("Press Esc to capture a frame\n");
 		cvNamedWindow( "Video", CV_WINDOW_AUTOSIZE );
 		capture = cvCreateFileCapture( nome_arquivo);
-		while(1) {
+		//problems getting the video file
+		image = cvQueryFrame( capture );
+		/*while(1) {
 			image = cvQueryFrame( capture );
 			if( !image ) break;
 			cvShowImage( "Video", image );
 			char c = cvWaitKey(33);
 			if( c == 27 ) break;
-		}
+		}*/
 	cvReleaseCapture( &capture );
 	cvDestroyWindow( "Video" );
 	}
@@ -100,6 +102,7 @@ private:
 	ImageGetter *imagegetter;
 	vector<Vec4i> lines;
 	vector<Vec3f> circles;
+	int min_dist , param_1 , param_2 ;
 
 	void prepare(){
 		imagegetter = new ImageGetter();
@@ -126,7 +129,7 @@ private:
 	}
 
 	void makeHoughCircles(){
-		HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/8, 200, 100, 0, 0 );
+		HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, min_dist, param_1, param_2, 0, 0 );
 	}
 
 	void drawLines(){
@@ -162,16 +165,44 @@ private:
 	void houghLines(){
 		prepareHoughLines();
 		makeHoughLines();
+		printf("Quantidade de linhas detecadas:  %lu \n",lines.size());
 		drawLines();
 		showHoughLines();
+
 	}
 
 	void houghCircles(){
+		min_dist = 100;
+		param_1 = 100;
+		param_2 = 43;
 		prepareHoughCircles();
 		makeHoughCircles();
+		printf("Quantidade de circulos detectados : %lu \n",circles.size());
+
+
 		drawCircles();
 		showHoughCircles();
+
+
 	}
+
+	//funcao usada para testar os parametros
+	void houghCirclesTest(){
+		prepareHoughCircles();
+		for(min_dist = 100;min_dist<1000;min_dist++){
+			for(param_1 = 100;param_1<1000;param_1++){
+				for(param_2 = 10;param_2<1000;param_2++){
+					makeHoughCircles();
+					printf("Quantidade de circulos detectados com min_dist = %d, param_1 = %d e param_2 = %d:  %lu \n",min_dist,param_1,param_2,circles.size());
+				}
+
+			}
+		}
+
+		//drawCircles();
+		//showHoughCircles();
+	}
+
 
 	void hough(){
 		houghLines();

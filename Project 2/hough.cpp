@@ -13,7 +13,7 @@ using namespace cv;
 class ImageGetter{
 private:
 	int option;
-	char nome_arquivo[100];
+	char file_name[100];
 	CvCapture* capture;
 public:
 	IplImage* image;
@@ -47,42 +47,69 @@ public:
 
 	void getImageFromImageFile(){
 		printf("Enter file's name (with extension): \n");
-		scanf("%s",nome_arquivo);
-		image = cvLoadImage(nome_arquivo, CV_LOAD_IMAGE_COLOR);
+		scanf("%s",file_name);
+		image = cvLoadImage(file_name, CV_LOAD_IMAGE_COLOR);
 		if(!image){
 			printf("Couldn't open input image! \n");
-			exit(1);
+			exit(-1);
 		}
+
+		cout << "\nimage channels: " << image->nChannels << endl;
 	}
 
 	void getImageFromVideo(){
 		printf("Enter file's name (with extension): \n");
-		scanf("%s",nome_arquivo);
-		printf("Press Esc to capture a frame\n");
-		cvNamedWindow( "Video", CV_WINDOW_AUTOSIZE );
-		capture = cvCreateFileCapture( nome_arquivo);
-		//problems getting the video file
-		image = cvQueryFrame( capture );
-		/*while(1) {
-			image = cvQueryFrame( capture );
-			if( !image ) break;
-			cvShowImage( "Video", image );
-			char c = cvWaitKey(33);
-			if( c == 27 ) break;
-		}*/
-	cvReleaseCapture( &capture );
-	cvDestroyWindow( "Video" );
+		scanf("%s",file_name);
+		printf("\nPress Esc to capture a frame\n\n");
+
+	    capture = cvCaptureFromFile(file_name);
+
+	    if (!capture)
+	    {
+	        cout << "\nCouldn't open video file!" << endl;
+	        exit(-2);
+	    }
+
+	    namedWindow("Video", CV_WINDOW_AUTOSIZE);
+	    image = cvQueryFrame(capture);
+	    cvShowImage("Video", image);
+
+	    while(1)
+	    {
+	        if(!capture)
+	        {
+	            cout << "\nVideo has reached its end!" << endl;
+	            break;
+	        }
+	        
+	        char c = waitKey(20);
+	        if (c == 27)
+	        	break;
+
+	        image = cvQueryFrame(capture);
+
+	        cvShowImage("Video", image);
+	    }
+
+	    cvReleaseCapture(&capture);
+		destroyWindow("Video");
+		
+		//cout << "\nimage channels: " << image->nChannels << endl;
 	}
 
 	void getImageFromCamera(){
 		capture = cvCreateCameraCapture( -1 );
+
 		if(!capture)
 	    {
 	      printf("\nCouldn't open the camera\n");
 	      exit(-1);
 	    }
+
 	    image = cvQueryFrame( capture );
+	    
 	    cvNamedWindow( "Camera");
+	    
 	    while(image)
     	{
     		cvShowImage( "Camera", image );
@@ -110,8 +137,6 @@ private:
 
 		src1 = *src;
 		src2 = *src;
-		//src1 = new Mat(imagegetter->image);
-		//src2 = new Mat(imagegetter->image);
 	}
 
 	void prepareHoughLines(){
@@ -153,6 +178,7 @@ private:
 	void showHoughLines(){
 		namedWindow( "Source", CV_WINDOW_AUTOSIZE );
 		namedWindow( "Detected lines", CV_WINDOW_AUTOSIZE );
+		//cout << "\nMat dimension: " << src->dims << endl;
 		imshow("Source", *src);
 		imshow("Detected lines", cdst);
 	}
@@ -165,25 +191,23 @@ private:
 	void houghLines(){
 		prepareHoughLines();
 		makeHoughLines();
-		printf("Quantidade de linhas detecadas:  %lu \n",lines.size());
+		printf("Detected lines:  %lu \n",lines.size());
 		drawLines();
 		showHoughLines();
-
 	}
 
 	void houghCircles(){
 		min_dist = 100;
 		param_1 = 100;
-		param_2 = 43;
+		//param_1 = 116;
+		param_2 = 44;
+		//param_2 = 10;
 		prepareHoughCircles();
 		makeHoughCircles();
-		printf("Quantidade de circulos detectados : %lu \n",circles.size());
-
+		printf("Detected circles: %lu \n",circles.size());
 
 		drawCircles();
 		showHoughCircles();
-
-
 	}
 
 	//funcao usada para testar os parametros
@@ -198,15 +222,13 @@ private:
 
 			}
 		}
-
-		//drawCircles();
-		//showHoughCircles();
 	}
 
 
 	void hough(){
 		houghLines();
 		houghCircles();
+		//houghCirclesTest();
 	}
 
 public:

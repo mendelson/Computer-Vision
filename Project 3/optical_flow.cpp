@@ -173,6 +173,8 @@ public:
          flow();
      }
      void flow(){
+    	 p1 = 0.1;
+    	 p2 = 0.000001;
          init();
          while(1){
              callHornSchunk();
